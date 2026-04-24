@@ -83,8 +83,33 @@ def compute_note_totals(note: dict) -> dict:
     note["payment_status"] = payment_status
     return note
 
-async def compute_order_summary(order: dict) -> dict:
-    notes = await db.notes.find({"order_id": order["id"]}, {"_id": 0}).to_list(1000)
+NOTE_SUMMARY_PROJECTION = {"_id": 0, "id": 1, "order_id": 1, "subtotal": 1,
+                           "discount_pct": 1, "delivered": 1, "abonos": 1}
+ORDER_SUMMARY_PROJECTION = {"_id": 0, "id": 1, "month_id": 1, "cost": 1, "delivered": 1}
+
+async def _fetch_notes_by_order(order_ids: list) -> dict:
+    if not order_ids:
+        return {}
+    all_notes = await db.notes.find(
+        {"order_id": {"$in": order_ids}}, NOTE_SUMMARY_PROJECTION
+    ).to_list(10000)
+    grouped = {}
+    for n in all_notes:
+        grouped.setdefault(n["order_id"], []).append(n)
+    return grouped
+
+async def _fetch_orders_by_month(month_ids: list) -> dict:
+    if not month_ids:
+        return {}
+    all_orders = await db.orders.find(
+        {"month_id": {"$in": month_ids}}, ORDER_SUMMARY_PROJECTION
+    ).to_list(10000)
+    grouped = {}
+    for o in all_orders:
+        grouped.setdefault(o["month_id"], []).append(o)
+    return grouped
+
+def compute_order_summary_sync(order: dict, notes: list) -> dict:
     notes = [compute_note_totals(n) for n in notes]
     total_clientes = round(sum(n["total_final"] for n in notes), 2)
     cobrado = round(sum(n["paid"] for n in notes), 2)
@@ -101,9 +126,32 @@ async def compute_order_summary(order: dict) -> dict:
     order["ganancia_potencial"] = ganancia_potencial
     return order
 
-async def compute_month_summary(month: dict) -> dict:
-    orders = await db.orders.find({"month_id": month["id"]}, {"_id": 0}).to_list(1000)
-    orders = [await compute_order_summary(o) for o in orders]
+async def compute_order_summary(order: dict, notes_by_order: dict | None = None) -> dict:
+    if notes_by_order is None:
+        notes = await db.notes.find(
+            {"order_id": order["id"]}, NOTE_SUMMARY_PROJECTION
+        ).to_list(1000)
+    else:
+        notes = notes_by_order.get(order["id"], [])
+    return compute_order_summary_sync(order, notes)
+
+async def compute_month_summary(
+    month: dict,
+    orders_by_month: dict | None = None,
+    notes_by_order: dict | None = None,
+) -> dict:
+    if orders_by_month is None:
+        orders = await db.orders.find(
+            {"month_id": month["id"]}, ORDER_SUMMARY_PROJECTION
+        ).to_list(1000)
+    else:
+        orders = orders_by_month.get(month["id"], [])
+
+    if notes_by_order is None:
+        order_ids = [o["id"] for o in orders]
+        notes_by_order = await _fetch_notes_by_order(order_ids)
+
+    orders = [compute_order_summary_sync(o, notes_by_order.get(o["id"], [])) for o in orders]
     total_clientes = round(sum(o["total_clientes"] for o in orders), 2)
     cobrado = round(sum(o["cobrado"] for o in orders), 2)
     pendiente_cobrar = round(sum(o["pendiente_cobrar"] for o in orders), 2)
@@ -125,8 +173,17 @@ async def compute_month_summary(month: dict) -> dict:
 
 @api_router.get("/months")
 async def list_months():
-    months = await db.months.find({}, {"_id": 0}).sort([("year", -1), ("month", -1)]).to_list(1000)
-    return [await compute_month_summary(m) for m in months]
+    months = await db.months.find(
+        {}, {"_id": 0, "id": 1, "year": 1, "month": 1}
+    ).sort([("year", -1), ("month", -1)]).to_list(1000)
+    month_ids = [m["id"] for m in months]
+    orders_by_month = await _fetch_orders_by_month(month_ids)
+    all_order_ids = [o["id"] for orders in orders_by_month.values() for o in orders]
+    notes_by_order = await _fetch_notes_by_order(all_order_ids)
+    return [
+        await compute_month_summary(m, orders_by_month, notes_by_order)
+        for m in months
+    ]
 
 @api_router.post("/months")
 async def create_month(payload: MonthCreate):
@@ -149,9 +206,17 @@ async def get_month(month_id: str):
     m = await db.months.find_one({"id": month_id}, {"_id": 0})
     if not m:
         raise HTTPException(status_code=404, detail="Mes no encontrado")
-    m = await compute_month_summary(m)
-    orders = await db.orders.find({"month_id": month_id}, {"_id": 0}).sort("created_at", 1).to_list(1000)
-    orders = [await compute_order_summary(o) for o in orders]
+    orders = await db.orders.find(
+        {"month_id": month_id}, {"_id": 0}
+    ).sort("created_at", 1).to_list(1000)
+    order_ids = [o["id"] for o in orders]
+    notes_by_order = await _fetch_notes_by_order(order_ids)
+    orders = [compute_order_summary_sync(o, notes_by_order.get(o["id"], [])) for o in orders]
+    m = await compute_month_summary(
+        m,
+        orders_by_month={month_id: orders},
+        notes_by_order=notes_by_order,
+    )
     m["orders"] = orders
     return m
 
@@ -300,8 +365,17 @@ async def delete_abono(note_id: str, abono_id: str):
 
 @api_router.get("/summary")
 async def global_summary():
-    months = await db.months.find({}, {"_id": 0}).sort([("year", -1), ("month", -1)]).to_list(1000)
-    months = [await compute_month_summary(m) for m in months]
+    months = await db.months.find(
+        {}, {"_id": 0, "id": 1, "year": 1, "month": 1}
+    ).sort([("year", -1), ("month", -1)]).to_list(1000)
+    month_ids = [m["id"] for m in months]
+    orders_by_month = await _fetch_orders_by_month(month_ids)
+    all_order_ids = [o["id"] for orders in orders_by_month.values() for o in orders]
+    notes_by_order = await _fetch_notes_by_order(all_order_ids)
+    months = [
+        await compute_month_summary(m, orders_by_month, notes_by_order)
+        for m in months
+    ]
     total_ganancia = round(sum(m["ganancia"] for m in months), 2)
     total_cobrado = round(sum(m["cobrado"] for m in months), 2)
     total_pendiente = round(sum(m["pendiente_cobrar"] for m in months), 2)
