@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react"; // Importar useCallback
 import { Link, useParams } from "react-router-dom";
 import { Plus, Package, ChevronRight, Trash2, CheckCircle2, Clock } from "lucide-react";
 import { Months, Orders } from "@/lib/api";
@@ -36,7 +36,8 @@ const MonthDetail = () => {
   const [name, setName] = useState("");
   const [cost, setCost] = useState("");
 
-  const load = async () => {
+  // Usamos useCallback para memoizar la función load
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       setMonth(await Months.get(id));
@@ -45,11 +46,12 @@ const MonthDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]); // Dependemos solo de 'id'
 
+  // Usamos el hook useEffect con la función load memoizada
   useEffect(() => {
-  load();
-}, [id, load]);
+    load();
+  }, [id, load]); // Dependemos de 'id' y 'load'
 
   const handleCreate = async () => {
     if (!name.trim()) {
@@ -66,7 +68,7 @@ const MonthDetail = () => {
       setOpen(false);
       setName("");
       setCost("");
-      load();
+      load(); // Recargar datos después de la creación
     } catch {
       toast.error("No se pudo crear el pedido");
     }
