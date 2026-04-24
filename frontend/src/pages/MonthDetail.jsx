@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react"; // Importar useCallback
+lo puedes integrar a mi codigo de monthdetail import React, { useEffect, useState, useCallback } from "react"; // Importar useCallback
 import { Link, useParams } from "react-router-dom";
 import { Plus, Package, ChevronRight, Trash2, CheckCircle2, Clock } from "lucide-react";
 import { Months, Orders } from "@/lib/api";
