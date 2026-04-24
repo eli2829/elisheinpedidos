@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/package.json",  // Asegúrate de que la ruta esté correcta si tu app está en un subdirectorio llamado "frontend"
+      "src": "frontend/package.json",  
       "use": "@vercel/static-build"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/frontend/$1"  // Asegúrate de que tu app está en el directorio correcto (frontend en este caso)
+      "dest": "/frontend/$1" 
     }
   ]
 }
