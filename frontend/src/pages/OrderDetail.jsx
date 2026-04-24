@@ -67,9 +67,9 @@ const OrderDetail = () => {
     }
   };
 
-  useEffect(() => {
-    load();
-  }, [id]);
+ useEffect(() => {
+  load();
+}, [id]);
 
   const handleCreateNote = async () => {
     if (!clientName.trim()) {
