@@ -1,0 +1,84 @@
+{
+  "theme": "LIGHT",
+  "archetype": "3 (Pastel & Soft)",
+  "typography": {
+    "fonts": {
+      "heading": "'Outfit', sans-serif",
+      "body": "'DM Sans', sans-serif"
+    },
+    "scales": {
+      "h1": "text-4xl tracking-tight font-bold",
+      "h2": "text-2xl tracking-tight font-semibold",
+      "h3": "text-xl font-medium",
+      "body": "text-base text-gray-800",
+      "small": "text-sm text-gray-500",
+      "tiny_label": "text-xs tracking-[0.1em] uppercase font-semibold text-gray-400"
+    }
+  },
+  "colors": {
+    "background": "bg-[#FAFAFA]",
+    "surface": "bg-white",
+    "primary": {
+      "base": "bg-[#FF4D6D]",
+      "hover": "hover:bg-[#E03A58]",
+      "text": "text-white"
+    },
+    "secondary": {
+      "base": "bg-[#F3E8FF]",
+      "text": "text-[#7E22CE]"
+    },
+    "success": {
+      "base": "bg-[#D1FAE5]",
+      "text": "text-[#059669]",
+      "indicator": "bg-[#10B981]"
+    },
+    "warning": {
+      "base": "bg-[#FEF3C7]",
+      "text": "text-[#D97706]",
+      "indicator": "bg-[#F59E0B]"
+    },
+    "text": {
+      "main": "text-gray-900",
+      "muted": "text-gray-500",
+      "inverse": "text-white"
+    },
+    "border": "border-gray-100"
+  },
+  "spacing_and_layout": {
+    "container": "w-full max-w-md mx-auto px-4 sm:px-6 pb-24",
+    "card": "p-4 rounded-2xl bg-white border border-gray-100 shadow-sm",
+    "list_gap": "gap-3",
+    "section_gap": "gap-6"
+  },
+  "components": {
+    "button": "rounded-full py-3 px-6 font-medium transition-all active:scale-95 flex items-center justify-center",
+    "input": "w-full rounded-xl border border-gray-200 bg-gray-50 p-3 focus:ring-2 focus:ring-[#FF4D6D]/20 focus:border-[#FF4D6D] focus:bg-white transition-colors",
+    "status_badge": "px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider flex w-fit items-center gap-1.5",
+    "bottom_nav": "fixed bottom-0 w-full max-w-md bg-white/80 backdrop-blur-xl border-t border-gray-100 p-4 flex justify-around items-center z-50",
+    "header": "sticky top-0 bg-[#FAFAFA]/90 backdrop-blur-md z-40 py-4 mb-4"
+  },
+  "motion": {
+    "page_transition": "animate-in fade-in slide-in-from-bottom-4 duration-300",
+    "list_item": "animate-in fade-in slide-in-from-bottom-2 duration-300"
+  },
+  "media": {
+    "image_urls": {
+      "client_avatars": [
+        "https://images.unsplash.com/photo-1644313720910-9a2520bbd28f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwzfHxmYXNoaW9uJTIwd29tYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NzcwMDc3NTh8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1696489283182-0446be970e40?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwyfHxmYXNoaW9uJTIwd29tYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NzcwMDc3NTh8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1660152988640-99bcdecf2bc5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwd29tYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NzcwMDc3NTh8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1697045412584-ec9b2b522bf2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHw0fHxmYXNoaW9uJTIwd29tYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NzcwMDc3NTh8MA&ixlib=rb-4.1.0&q=85"
+      ]
+    }
+  },
+  "instructions_to_main_agent": [
+    "Build a mobile-first, lightweight PWA-style interface optimized for max-w-md layout.",
+    "Use pure HTML + Tailwind for structural layouts, and customized Shadcn components for complex interactions (Dialogs for forms, Select for discounts).",
+    "App flow should consist of: Months view -> Orders in Month view -> Order Details (Notes/Clients) -> Client Note Detail (Abonos).",
+    "Ensure the 'data-testid' attributes are attached to buttons, links, form inputs, and key informational elements.",
+    "Calculations to implement: Client Note Discount = Total * (1 - Discount/100). Order Profit = Sum of all Notes - Order Cost. Paid Status = Total Paid >= Final Total.",
+    "Implement the 'SHEIN' fashion reseller vibe: Use the primary Coral color (#FF4D6D) sparingly for primary CTAs and active states, rely on abundant white space and rounded-2xl cards.",
+    "For the header gradient, since image generation failed, use a CSS gradient class: 'bg-gradient-to-r from-pink-50 via-purple-50 to-white' for soft, aesthetic top headers.",
+    "Load dummy data prefilled for at least 2 months, 3 orders, and several clients with abonos to demonstrate functionality instantly."
+  ]
+}
