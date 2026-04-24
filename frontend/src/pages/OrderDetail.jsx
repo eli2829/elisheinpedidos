@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react"; // Importar useCallback
 import { Link, useParams } from "react-router-dom";
 import {
   Plus, Users, ChevronRight, Trash2, CheckCircle2,
@@ -53,7 +53,8 @@ const OrderDetail = () => {
   const [editName, setEditName] = useState("");
   const [editCost, setEditCost] = useState("");
 
-  const load = async () => {
+  // Usamos useCallback para memoizar la función load
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const o = await Orders.get(id);
@@ -65,11 +66,12 @@ const OrderDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]); // Dependemos solo de 'id'
 
- useEffect(() => {
-  load();
-}, [id]);
+  // Usamos el hook useEffect con la función load memoizada
+  useEffect(() => {
+    load();
+  }, [id, load]); // Dependemos de 'id' y 'load'
 
   const handleCreateNote = async () => {
     if (!clientName.trim()) {
