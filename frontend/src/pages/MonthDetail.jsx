@@ -48,8 +48,8 @@ const MonthDetail = () => {
   };
 
   useEffect(() => {
-    load();
-  }, [id]);
+  load();
+}, [id, load]);
 
   const handleCreate = async () => {
     if (!name.trim()) {
