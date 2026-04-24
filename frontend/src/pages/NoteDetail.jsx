@@ -37,7 +37,9 @@ const NoteDetail = () => {
     }
   };
 
-  useEffect(() => { load(); }, [id]);
+  useEffect(() => {
+  load();
+}, [id, load]);
 
   const handleAddAbono = async () => {
     const amt = Number(amount || 0);
