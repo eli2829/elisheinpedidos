@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react"; // Importar useCallback
 import { useParams } from "react-router-dom";
 import { Plus, Trash2, Coins, Receipt, CheckCircle2, Clock } from "lucide-react";
 import { Notes } from "@/lib/api";
@@ -26,7 +26,8 @@ const NoteDetail = () => {
   const [date, setDate] = useState(todayISO());
   const [amount, setAmount] = useState("");
 
-  const load = async () => {
+  // Usamos useCallback para memoizar la función load
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       setNote(await Notes.get(id));
@@ -35,11 +36,12 @@ const NoteDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]); // Dependemos solo de 'id'
 
+  // Usamos el hook useEffect con la función load memoizada
   useEffect(() => {
-  load();
-}, [id, load]);
+    load();
+  }, [id, load]); // Dependemos de 'id' y 'load'
 
   const handleAddAbono = async () => {
     const amt = Number(amount || 0);
@@ -53,7 +55,7 @@ const NoteDetail = () => {
       setOpen(false);
       setAmount("");
       setDate(todayISO());
-      load();
+      load(); // Recargar datos después de agregar un abono
     } catch {
       toast.error("Error");
     }
